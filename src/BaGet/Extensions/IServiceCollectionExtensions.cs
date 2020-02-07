@@ -8,7 +8,7 @@ using BaGet.Aliyun.Extensions;
 using BaGet.Aws;
 using BaGet.Aws.Configuration;
 using BaGet.Aws.Extensions;
-using BaGet.Azure;
+//using BaGet.Azure;
 using BaGet.Core;
 using BaGet.Core.Content;
 using BaGet.Core.Server.Extensions;
@@ -40,8 +40,8 @@ namespace BaGet.Extensions
             services.ConfigureAndValidate<StorageOptions>(configuration.GetSection(nameof(BaGetOptions.Storage)));
             services.ConfigureAndValidate<DatabaseOptions>(configuration.GetSection(nameof(BaGetOptions.Database)));
             services.ConfigureAndValidate<FileSystemStorageOptions>(configuration.GetSection(nameof(BaGetOptions.Storage)));
-            services.ConfigureAndValidate<BlobStorageOptions>(configuration.GetSection(nameof(BaGetOptions.Storage)));
-            services.ConfigureAndValidate<AzureSearchOptions>(configuration.GetSection(nameof(BaGetOptions.Search)));
+            //services.ConfigureAndValidate<BlobStorageOptions>(configuration.GetSection(nameof(BaGetOptions.Storage)));
+            //services.ConfigureAndValidate<AzureSearchOptions>(configuration.GetSection(nameof(BaGetOptions.Search)));
 
             services.ConfigureAzure(configuration);
             services.ConfigureAws(configuration);
@@ -69,8 +69,8 @@ namespace BaGet.Extensions
                     case DatabaseType.PostgreSql:
                         return new PackageService(provider.GetRequiredService<IContext>());
 
-                    case DatabaseType.AzureTable:
-                        return provider.GetRequiredService<TablePackageService>();
+//                    case DatabaseType.AzureTable:
+//                        return provider.GetRequiredService<TablePackageService>();
 
                     default:
                         throw new InvalidOperationException(
@@ -159,8 +159,8 @@ namespace BaGet.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.ConfigureAndValidate<BlobStorageOptions>(configuration.GetSection(nameof(BaGetOptions.Storage)));
-            services.ConfigureAndValidate<AzureSearchOptions>(configuration.GetSection(nameof(BaGetOptions.Search)));
+//            services.ConfigureAndValidate<BlobStorageOptions>(configuration.GetSection(nameof(BaGetOptions.Storage)));
+//            services.ConfigureAndValidate<AzureSearchOptions>(configuration.GetSection(nameof(BaGetOptions.Search)));
 
             return services;
         }
@@ -199,8 +199,8 @@ namespace BaGet.Extensions
             services.AddTransient<IPackageStorageService, PackageStorageService>();
             services.AddTransient<ISymbolStorageService, SymbolStorageService>();
 
-            services.AddTableStorageService();
-            services.AddBlobStorageService();
+//            services.AddTableStorageService();
+//            services.AddBlobStorageService();
             services.AddS3StorageService();
             services.AddGoogleCloudStorageService();
             services.AddAliyunStorageService();
@@ -214,8 +214,8 @@ namespace BaGet.Extensions
                     case StorageType.FileSystem:
                         return provider.GetRequiredService<FileStorageService>();
 
-                    case StorageType.AzureBlobStorage:
-                        return provider.GetRequiredService<BlobStorageService>();
+//                    case StorageType.AzureBlobStorage:
+//                        return provider.GetRequiredService<BlobStorageService>();
 
                     case StorageType.AwsS3:
                         return provider.GetRequiredService<S3StorageService>();
@@ -257,8 +257,8 @@ namespace BaGet.Extensions
                             case DatabaseType.SqlServer:
                                 return provider.GetRequiredService<DatabaseSearchService>();
 
-                            case DatabaseType.AzureTable:
-                                return provider.GetRequiredService<TableSearchService>();
+//                            case DatabaseType.AzureTable:
+//                                return provider.GetRequiredService<TableSearchService>();
 
                             default:
                                 throw new InvalidOperationException(
@@ -266,8 +266,8 @@ namespace BaGet.Extensions
                                     $"search type '{searchOptions.Value.Type}'");
                         }
 
-                    case SearchType.Azure:
-                        return provider.GetRequiredService<AzureSearchService>();
+//                    case SearchType.Azure:
+//                        return provider.GetRequiredService<AzureSearchService>();
 
                     case SearchType.Null:
                         return provider.GetRequiredService<NullSearchService>();
@@ -288,8 +288,8 @@ namespace BaGet.Extensions
                     case SearchType.Database:
                         return provider.GetRequiredService<NullSearchIndexer>();
 
-                    case SearchType.Azure:
-                        return provider.GetRequiredService<AzureSearchIndexer>();
+//                    case SearchType.Azure:
+//                        return provider.GetRequiredService<AzureSearchIndexer>();
 
                     default:
                         throw new InvalidOperationException(
@@ -300,8 +300,8 @@ namespace BaGet.Extensions
             services.AddTransient<DatabaseSearchService>();
             services.AddSingleton<NullSearchService>();
             services.AddSingleton<NullSearchIndexer>();
-            services.AddAzureSearch();
-            services.AddAzureTableSearch();
+//            services.AddAzureSearch();
+//            services.AddAzureTableSearch();
 
             return services;
         }
