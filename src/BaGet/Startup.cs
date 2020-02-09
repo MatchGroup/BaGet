@@ -37,7 +37,6 @@ namespace BaGet
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             var options = Configuration.Get<BaGetOptions>();
-            app.UseCoeSecrets(Configuration, options);
 
             if (env.IsDevelopment())
             {
