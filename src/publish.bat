@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 
 if [%1]==[] goto BLANK
 
-dotnet publish BaGet -c Release -o .\app\%1 --self-contained -r %1
+dotnet publish BaGet -c Release -o .\bin\%1 --self-contained -r %1
 
 GOTO DONE
 
