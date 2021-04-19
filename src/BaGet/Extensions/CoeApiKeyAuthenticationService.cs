@@ -1,6 +1,10 @@
+using Amazon;
+using Amazon.SecretsManager;
+using Amazon.SecretsManager.Model;
 using BaGet.Core;
-using Coe.Secrets;
-using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,19 +12,11 @@ namespace BaGet.Extensions
 {
     public class CoeApiKeyAuthenticationService : IAuthenticationService
     {
-        private const string CONFIG_PREFIX = "COE_SECRETS_";
+        private readonly static Regex _secretCleaner = new Regex("\\{|\"|:|}|ApiKey");
 
-        private readonly ISecretsManagementService _sms;
-        private readonly IConfiguration _configuration;
         private readonly static SemaphoreSlim _locker = new SemaphoreSlim(1, 1);
         private static bool _checked;
         private static string _apiKey;
-
-        public CoeApiKeyAuthenticationService(ISecretsManagementService sms, IConfiguration configuration)
-        {
-            _sms = sms;
-            _configuration = configuration;
-        }
 
         public async Task<bool> AuthenticateAsync(string apiKey, CancellationToken cancellationToken)
         {
@@ -31,9 +27,7 @@ namespace BaGet.Extensions
                 {
                     if (_checked == false)
                     {
-                        var path = _configuration.GetValue(CONFIG_PREFIX + "PATH", "shared/nuget");
-                        var key = _configuration.GetValue(CONFIG_PREFIX + "KEY", "key");
-                        _apiKey = await _sms.GetString(path, key, shouldThrowWhenMissing: true);
+                        _apiKey = await GetSecret();
                         _checked = true;
                     }
                 }
@@ -43,6 +37,38 @@ namespace BaGet.Extensions
             return (_apiKey is null)
                 ? true
                 : (_apiKey == apiKey);
+        }
+
+        public static async Task<string> GetSecret()
+        {
+            const string secretName = "nuget-api-key";
+            const string region = "us-east-1";
+
+            var request = new GetSecretValueRequest
+            {
+                SecretId = secretName,
+                VersionStage = "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
+            };
+
+            using (IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(region)))
+            {
+                var response = await client.GetSecretValueAsync(request);
+
+                string secret = null;
+
+                if (response.SecretString is object)
+                {
+                    secret = response.SecretString;
+                }
+                else
+                {
+                    using (var memoryStream = response.SecretBinary)
+                    using (var reader = new StreamReader(memoryStream))
+                        secret = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(reader.ReadToEnd()));
+                }
+
+                return _secretCleaner.Replace(secret, "");
+            }
         }
     }
 }
