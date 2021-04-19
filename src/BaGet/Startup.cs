@@ -24,7 +24,7 @@ namespace BaGet
         public void ConfigureServices(IServiceCollection services)
         {
             services.ConfigureBaGet(Configuration, httpServices: true);
-            services.AddContainerMappingsForCoeSecrets<SecretsSettings>();
+            services.AddContainerMappingsForCoeSecrets();
 
             // In production, the UI files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -37,6 +37,7 @@ namespace BaGet
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             var options = Configuration.Get<BaGetOptions>();
+            app.UseCoeSecrets(Configuration, options);
 
             if (env.IsDevelopment())
             {

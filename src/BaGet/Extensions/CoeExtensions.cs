@@ -1,19 +1,28 @@
 using BaGet.Core;
-using Coe.Secrets;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace BaGet.Extensions
 {
     public static class CoeExtensions
     {
-        public static void AddContainerMappingsForCoeSecrets<
-            Overridden_SecretsSettingsBase
-            >(this IServiceCollection services)
-            where Overridden_SecretsSettingsBase : SecretsSettingsBase
+        public static void AddContainerMappingsForCoeSecrets(this IServiceCollection services)
         {
-            services.AddSingleton<ISecretsSettings, Overridden_SecretsSettingsBase>();
-            services.AddSingleton<ISecretsManagementService, SecretsManagementService>();
             services.AddTransient<IAuthenticationService, CoeApiKeyAuthenticationService>();
+        }
+
+        public static void UseCoeSecrets(this IApplicationBuilder app, IConfiguration configuration, BaGetOptions options)
+        {
+            if (app is null || configuration is null || options is null || string.IsNullOrWhiteSpace(options.ApiKey) == false)
+                return;
+
+            options.ApiKey = CoeApiKeyAuthenticationService.GetSecret()
+                .GetAwaiter()
+                .GetResult();
+
+            Console.WriteLine($"Key found in GetSecret()");
         }
     }
 }
